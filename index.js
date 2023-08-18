@@ -13,7 +13,7 @@ const client = new MongoClient(process.env.MONGO_URI)
 app.use(cors())
 
 app.get('/render/:id', async (req, res) => {
-  const data = await client.db('rates-protocol').collection('planets').findOne({ nft_id: parseInt(req.params.id) })
+  const data = await client.db(process.env.DB).collection('planets').findOne({ nft_id: parseInt(req.params.id) })
 
   const buffer = render.main({
     seed: data.digest,
@@ -31,7 +31,7 @@ app.get('/render/:id', async (req, res) => {
 })
 
 app.get('/planets/:id', async (req, res) => {
-  const data = await client.db('rates-protocol').collection('planets').findOne({ nft_id: parseInt(req.params.id) })
+  const data = await client.db(process.env.DB).collection('planets').findOne({ nft_id: parseInt(req.params.id) })
 
   const buffer = render.main({
     seed: data.digest,
@@ -44,30 +44,6 @@ app.get('/planets/:id', async (req, res) => {
     arts: data.arts
   })
 
-  res.contentType('image/png')
-  res.send(buffer)
-})
-
-app.get('/planets', async (req, res) => {
-  const sort = req.query.sort ? {
-    [req.query.sort.split('::')[0]]: parseInt(req.query.sort.split('::')[1])
-  } : {
-    nft_id: -1
-  }
-  const skip = parseInt(req.query.skip || 0)
-  const limit = parseInt(req.query.limit || 20)
-  const data = await client.db('rates-protocol').collection('planets').find().sort(sort).skip(skip).limit(limit).toArray()
-  return res.json(data)
-})
-
-app.get('/gif/:id', (req, res) => {
-  const buffer = render.gif(req.params.id)
-  res.contentType('image/png')
-  res.send(buffer)
-})
-
-app.get('/:id/:amp', (req, res) => {
-  const buffer = render.main(req.params.id, req.params.amp)
   res.contentType('image/png')
   res.send(buffer)
 })
